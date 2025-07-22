@@ -1,0 +1,16 @@
+services:
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - inventory-service
+
+  inventory-service:
+    build: ./services/inventory
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - SERVICE_NAME=inventory
+      - MONGO_URI=mongodb+srv://softypy:softypy123@cluster0.8a2ra.mongodb.net/inventory?retryWrites=true&w=majority&appName=Cluster0
