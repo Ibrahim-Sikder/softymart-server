@@ -8,9 +8,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-// Docker কন্টেইনারে সার্ভিস নাম ব্যবহার করুন (localhost নয়)
-const INVENTORY_SERVICE_URL =
-  process.env.INVENTORY_SERVICE_URL || 'http://inventory-service:4000';
+const PRODUCT_SERVICE_URL =
+  process.env.PRODUCT_SERVICE_URL || 'http://inventory-service:4001';
 
 app.use(cors());
 app.use(morgan('dev'));
@@ -21,12 +20,21 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 // ✅ Proxy to inventory service
+// app.use(
+//   '/inventory',
+//   createProxyMiddleware({
+//     target: INVENTORY_SERVICE_URL,
+//     changeOrigin: true,
+//     pathRewrite: { '^/inventory': '' },
+//   })
+// );
+// ✅ Proxy to product service
 app.use(
-  '/inventory',
+  '/product',
   createProxyMiddleware({
-    target: INVENTORY_SERVICE_URL,
+    target: PRODUCT_SERVICE_URL,
     changeOrigin: true,
-    pathRewrite: { '^/inventory': '' },
+    pathRewrite: { '^/product': '' },
   })
 );
 
