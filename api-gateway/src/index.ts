@@ -7,9 +7,10 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
-
 const PRODUCT_SERVICE_URL =
-  process.env.PRODUCT_SERVICE_URL || 'http://inventory-service:4001';
+  process.env.PRODUCT_SERVICE_URL || 'http://product-service:4001';
+const USER_SERVICE_URL =
+  process.env.USER_SERVICE_URL || 'http://user-service:4002';
 
 app.use(cors());
 app.use(morgan('dev'));
@@ -19,15 +20,6 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'API Gateway running' });
 });
 
-// ✅ Proxy to inventory service
-// app.use(
-//   '/inventory',
-//   createProxyMiddleware({
-//     target: INVENTORY_SERVICE_URL,
-//     changeOrigin: true,
-//     pathRewrite: { '^/inventory': '' },
-//   })
-// );
 // ✅ Proxy to product service
 app.use(
   '/product',
@@ -35,6 +27,15 @@ app.use(
     target: PRODUCT_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { '^/product': '' },
+  })
+);
+// ✅ Proxy to product service
+app.use(
+  '/user',
+  createProxyMiddleware({
+    target: USER_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: { '^/user': '' },
   })
 );
 

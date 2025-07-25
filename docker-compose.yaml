@@ -1,10 +1,18 @@
+version: '3.8'
+
 services:
-  api-gateway:
-    build: ./api-gateway
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
     ports:
-      - "8000:8000"
-    depends_on:
-      - product-service
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   product-service:
     build: ./services/product
     ports:
@@ -13,3 +21,35 @@ services:
       - PORT=4001
       - SERVICE_NAME=product
       - MONGO_URI=mongodb+srv://softypy:softypy123@cluster0.8a2ra.mongodb.net/product?retryWrites=true&w=majority&appName=Cluster0
+      - RABBITMQ_URL=amqp://rabbitmq
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+
+  user-service:
+    build: ./services/user
+    ports:
+      - "4002:4002"
+    environment:
+      - PORT=4002
+      - SERVICE_NAME=user
+      - MONGO_URI=mongodb+srv://softypy:softypy123@cluster0.8a2ra.mongodb.net/user?retryWrites=true&w=majority&appName=Cluster0
+      - RABBITMQ_URL=amqp://rabbitmq
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      product-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+    environment:
+      - PORT=8000
+      - RABBITMQ_URL=amqp://rabbitmq
