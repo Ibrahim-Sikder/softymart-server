@@ -1,7 +1,7 @@
 import amqp, { Channel, Connection } from 'amqplib';
 
 let channel: Channel;
-let chanes
+
 export async function connectRabbitMQ(retries = 10, interval = 5000) {
   while (retries) {
     try {

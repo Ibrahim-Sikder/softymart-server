@@ -6,8 +6,6 @@ import { getTenantInfo } from './utils/tenant';
 import { getTenantConnection } from './utils/dbConnection';
 import { productSchema } from './model';
 
-
-// ✅ Helper: Tenant Connection + Product Model ফেচ
 async function getTenantProductModel(tenantId: string) {
   const tenant: any = await getTenantInfo(tenantId);
 

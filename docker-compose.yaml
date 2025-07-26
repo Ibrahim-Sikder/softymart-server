@@ -13,6 +13,21 @@ services:
       timeout: 5s
       retries: 5
 
+  # ---------- USER SERVICE ----------
+  user-service:
+    build: ./services/user
+    ports:
+      - "4002:4002"
+    environment:
+      - PORT=4002
+      - SERVICE_NAME=user
+      - MONGO_URI=mongodb+srv://softypy:softypy123@cluster0.8a2ra.mongodb.net/user?retryWrites=true&w=majority&appName=Cluster0
+      - RABBITMQ_URL=amqp://rabbitmq
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # ---------- PRODUCT SERVICE ----------
   product-service:
     build: ./services/product
     ports:
@@ -28,28 +43,19 @@ services:
       user-service:
         condition: service_started
 
-  user-service:
-    build: ./services/user
-    ports:
-      - "4002:4002"
-    environment:
-      - PORT=4002
-      - SERVICE_NAME=user
-      - MONGO_URI=mongodb+srv://softypy:softypy123@cluster0.8a2ra.mongodb.net/user?retryWrites=true&w=majority&appName=Cluster0
-      - RABBITMQ_URL=amqp://rabbitmq
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
+  # ---------- API GATEWAY ----------
   api-gateway:
     build: ./api-gateway
     ports:
       - "8000:8000"
-    depends_on:
-      product-service:
-        condition: service_started
-      user-service:
-        condition: service_started
     environment:
       - PORT=8000
       - RABBITMQ_URL=amqp://rabbitmq
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      product-service:
+        condition: service_started
+ 
